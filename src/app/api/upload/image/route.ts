@@ -14,10 +14,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user is admin
-    if (userData.role !== 'admin') {
+    // Allow both admin and employee roles for image upload
+    if (userData.role !== 'admin' && userData.role !== 'employee') {
       return NextResponse.json(
-        { message: 'Access denied. Admin role required.' },
+        { message: 'Access denied. Admin or employee role required.' },
         { status: 403 }
       )
     }

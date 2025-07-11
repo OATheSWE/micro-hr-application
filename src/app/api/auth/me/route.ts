@@ -1,3 +1,5 @@
+export const runtime = 'nodejs';
+
 import { NextRequest, NextResponse } from 'next/server'
 import { findUserById } from '@/lib/db/queries'
 import { getUserFromRequest } from '@/lib/auth/jwt'

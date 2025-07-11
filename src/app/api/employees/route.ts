@@ -1,6 +1,9 @@
+export const runtime = 'nodejs';
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getUserFromRequest } from '@/lib/auth/jwt'
-import { getEmployees, createEmployee } from '@/lib/db/queries'
+import { getEmployees, createEmployee, createUser, findUserByEmail } from '@/lib/db/queries'
+import { hashPassword } from '@/lib/auth/jwt'
 
 // GET /api/employees - Get all employees with pagination
 export async function GET(request: NextRequest) {
@@ -93,6 +96,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Check if user already exists
+    const existingUser = await findUserByEmail(email)
+    if (existingUser) {
+      return NextResponse.json(
+        { message: 'User with this email already exists' },
+        { status: 400 }
+      )
+    }
+
     // Create employee
     const employee = await createEmployee({
       name,
@@ -103,7 +115,20 @@ export async function POST(request: NextRequest) {
       image_url: employeeData.image_url || null,
     })
 
-    return NextResponse.json(employee, { status: 201 })
+    // Create user account for the employee
+    const defaultPassword = 'employee123' // Default password for new employees
+    const hashedPassword = await hashPassword(defaultPassword)
+    
+    await createUser({
+      email,
+      password_hash: hashedPassword,
+      role: 'employee',
+    })
+
+    return NextResponse.json({
+      ...employee,
+      message: 'Employee created successfully. Default password is: employee123'
+    }, { status: 201 })
   } catch (error) {
     console.error('Create employee error:', error)
     return NextResponse.json(

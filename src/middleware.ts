@@ -1,53 +1,23 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { getUserFromRequest } from '@/lib/auth/jwt'
-
-// Define protected routes and their required roles
-const protectedRoutes = {
-  '/admin': ['admin'],
-  '/dashboard': ['admin'],
-  '/employees': ['admin'],
-  '/profile': ['admin', 'employee'],
-}
-
-// Define public routes that don't need authentication
-const publicRoutes = ['/login', '/', '/api/auth/login']
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Allow public routes
-  if (publicRoutes.includes(pathname)) {
+  // Only protect API routes, let client-side components handle page authentication
+  if (!pathname.startsWith('/api/')) {
     return NextResponse.next()
   }
 
-  // Check if route is protected
-  const isProtectedRoute = Object.keys(protectedRoutes).some(route => 
-    pathname.startsWith(route)
-  )
-
-  if (!isProtectedRoute) {
+  // Allow public API routes (login, signup, logout)
+  if (pathname.startsWith('/api/auth/login') || 
+      pathname.startsWith('/api/auth/signup') || 
+      pathname.startsWith('/api/auth/logout')) {
     return NextResponse.next()
   }
 
-  // Get user from JWT token
-  const userData = getUserFromRequest(request.headers)
-
-  if (!userData) {
-    // Redirect to login if not authenticated
-    const loginUrl = new URL('/login', request.url)
-    return NextResponse.redirect(loginUrl)
-  }
-
-  // Check role-based access
-  const requiredRoles = protectedRoutes[pathname as keyof typeof protectedRoutes] || []
-  
-  if (requiredRoles.length > 0 && !requiredRoles.includes(userData.role)) {
-    // Redirect to unauthorized page or return 403
-    const unauthorizedUrl = new URL('/unauthorized', request.url)
-    return NextResponse.redirect(unauthorizedUrl)
-  }
-
+  // For protected API routes, let the individual API routes handle authentication
+  // This allows them to use Node.js runtime and JWT verification
   return NextResponse.next()
 }
 
@@ -55,11 +25,10 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 } 

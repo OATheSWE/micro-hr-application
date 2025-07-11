@@ -17,6 +17,9 @@ apiClient.interceptors.request.use(
       const token = localStorage.getItem('token')
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
+        console.log('Adding token to request:', config.url, 'Token length:', token.length)
+      } else {
+        console.log('No token found for request:', config.url)
       }
     }
     return config
@@ -32,14 +35,8 @@ apiClient.interceptors.response.use(
     return response
   },
   (error) => {
-    // Handle authentication errors
-    if (error.response?.status === 401) {
-      // Clear token and redirect to login
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token')
-        window.location.href = '/login'
-      }
-    }
+    // Just log the error, don't automatically remove tokens
+    console.error('API Error:', error.response?.status, error.config?.url)
     return Promise.reject(error)
   }
 )

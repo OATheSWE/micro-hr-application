@@ -98,6 +98,19 @@ export async function getEmployeeById(id: number): Promise<Employee | null> {
 }
 
 /**
+ * Find employee by email
+ */
+export async function findEmployeeByEmail(email: string): Promise<Employee | null> {
+  try {
+    const [employee] = await db.select().from(employees).where(eq(employees.email, email))
+    return employee || null
+  } catch (error) {
+    console.error('Error finding employee by email:', error)
+    throw new Error('Failed to find employee')
+  }
+}
+
+/**
  * Update employee by ID
  */
 export async function updateEmployee(id: number, employeeData: Partial<Omit<NewEmployee, 'id' | 'created_at' | 'updated_at'>>): Promise<Employee> {

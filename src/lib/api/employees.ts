@@ -41,6 +41,16 @@ export const employeesApi = {
     return api.get<Employee>(`/employees/${id}`)
   },
 
+  // Get current employee's profile
+  getEmployeeProfile: async (): Promise<Employee> => {
+    return api.get<Employee>('/employees/profile')
+  },
+
+  // Update current employee's profile image
+  updateEmployeeProfile: async (image_url: string): Promise<Employee> => {
+    return api.patch<Employee>('/employees/profile', { image_url })
+  },
+
   // Create new employee
   createEmployee: async (employee: CreateEmployeeRequest): Promise<Employee> => {
     return api.post<Employee>('/employees', employee)

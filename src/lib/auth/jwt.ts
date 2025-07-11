@@ -4,6 +4,7 @@ import { User } from '@/lib/db/schema'
 
 // JWT secret from environment variables
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-here'
+console.log('JWT_SECRET loaded:', JWT_SECRET ? 'present' : 'missing', 'Length:', JWT_SECRET.length)
 
 // Token expiration time (24 hours)
 const TOKEN_EXPIRY = '24h'
@@ -26,11 +27,13 @@ export function generateToken(user: User): string {
  */
 export function verifyToken(token: string): { userId: number; email: string; role: string } | null {
   try {
+    console.log('Verifying token with secret length:', JWT_SECRET.length)
     const decoded = jwt.verify(token, JWT_SECRET) as {
       userId: number
       email: string
       role: string
     }
+    console.log('Token verified successfully:', { userId: decoded.userId, email: decoded.email, role: decoded.role })
     return decoded
   } catch (error) {
     console.error('Token verification failed:', error)
@@ -69,11 +72,17 @@ export function extractTokenFromHeader(authHeader: string | undefined): string |
  */
 export function getUserFromRequest(headers: Headers): { userId: number; email: string; role: string } | null {
   const authHeader = headers.get('authorization')
-  const token = extractTokenFromHeader(authHeader)
+  console.log('Auth header:', authHeader ? 'present' : 'missing')
+  
+  const token = extractTokenFromHeader(authHeader || undefined)
+  console.log('Extracted token:', token ? 'present' : 'missing')
   
   if (!token) {
     return null
   }
   
-  return verifyToken(token)
+  const verified = verifyToken(token)
+  console.log('Token verification result:', verified ? 'success' : 'failed')
+  
+  return verified
 } 
