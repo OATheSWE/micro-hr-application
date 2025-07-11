@@ -1,4 +1,4 @@
-import { eq, desc, asc } from 'drizzle-orm'
+import { eq, desc, asc, count } from 'drizzle-orm'
 import { db } from './index'
 import { users, employees, type User, type NewUser, type Employee, type NewEmployee } from './schema'
 
@@ -66,8 +66,8 @@ export async function getEmployees(page: number = 1, limit: number = 10): Promis
     const offset = (page - 1) * limit
     
     // Get total count
-    const [{ count }] = await db.select({ count: db.fn.count() }).from(employees)
-    const total = Number(count)
+    const countResult = await db.select({ count: count() }).from(employees)
+    const total = Number(countResult[0]?.count || 0)
     
     // Get paginated employees
     const employeeList = await db
@@ -155,7 +155,7 @@ export async function getDepartmentStats(): Promise<{ department: string, count:
     const stats = await db
       .select({
         department: employees.department,
-        count: db.fn.count(),
+        count: count(),
       })
       .from(employees)
       .groupBy(employees.department)
