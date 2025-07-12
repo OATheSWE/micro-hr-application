@@ -12,10 +12,10 @@ export const env = {
   JWT_SECRET: process.env.JWT_SECRET || '',
   
   // AWS S3 (using non-AWS prefixed names for Amplify compatibility)
-  AWS_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '',
-  AWS_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '',
-  AWS_REGION: process.env.S3_REGION || process.env.AWS_REGION || 'eu-west-1',
-  AWS_S3_BUCKET: process.env.S3_BUCKET_NAME || process.env.AWS_S3_BUCKET || '',
+  ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID || process.env.ACCESS_KEY_ID || '',
+  SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY || '',
+  REGION: process.env.S3_REGION || process.env.REGION || 'eu-west-1',
+  S3_BUCKET: process.env.S3_BUCKET_NAME || process.env.S3_BUCKET || '',
   
   // Next.js
   NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',

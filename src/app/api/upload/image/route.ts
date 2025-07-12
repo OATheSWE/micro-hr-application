@@ -8,10 +8,10 @@ config()
 
 // Debug: Log environment variables at the top
 console.log('=== UPLOAD API DEBUG ===')
-console.log('AWS_S3_BUCKET:', JSON.stringify(process.env.AWS_S3_BUCKET))
-console.log('AWS_REGION:', JSON.stringify(process.env.AWS_REGION))
-console.log('AWS_ACCESS_KEY_ID:', process.env.AWS_ACCESS_KEY_ID ? 'SET' : 'NOT_SET')
-console.log('AWS_SECRET_ACCESS_KEY:', process.env.AWS_SECRET_ACCESS_KEY ? 'SET' : 'NOT_SET')
+console.log('S3_BUCKET:', JSON.stringify(process.env.S3_BUCKET))
+console.log('REGION:', JSON.stringify(process.env.REGION))
+console.log('ACCESS_KEY_ID:', process.env.ACCESS_KEY_ID ? 'SET' : 'NOT_SET')
+console.log('SECRET_ACCESS_KEY:', process.env.SECRET_ACCESS_KEY ? 'SET' : 'NOT_SET')
 console.log('========================')
 
 // POST /api/upload/image - Generate signed URL for image upload

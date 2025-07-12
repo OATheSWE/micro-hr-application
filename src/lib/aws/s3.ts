@@ -3,17 +3,17 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 // AWS S3 configuration
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'eu-west-1',
+  region: process.env.REGION || 'eu-west-1',
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'AKIA23WHTYZLAQPZSQF2',
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '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',
+    accessKeyId: process.env.ACCESS_KEY_ID || 'AKIA23WHTYZLAQPZSQF2',
+    secretAccessKey: process.env.SECRET_ACCESS_KEY || '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',
   },
 })
 
-const BUCKET_NAME = process.env.AWS_S3_BUCKET || 'hope-hr-upload'
+const BUCKET_NAME = process.env.S3_BUCKET || 'hope-hr-upload'
 
 // Debug: Log the bucket name value
-console.log('AWS_S3_BUCKET value:', JSON.stringify(process.env.AWS_S3_BUCKET))
+console.log('S3_BUCKET value:', JSON.stringify(process.env.S3_BUCKET))
 console.log('BUCKET_NAME variable:', JSON.stringify(BUCKET_NAME))
 console.log('BUCKET_NAME length:', BUCKET_NAME.length)
 
