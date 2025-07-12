@@ -18,7 +18,7 @@ export const env = {
   S3_BUCKET: process.env.S3_BUCKET_NAME || process.env.S3_BUCKET || '',
   
   // Next.js
-  NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+  NEXTAUTH_URL: 'https://main.d2rui1j8gj3xa8.amplifyapp.com',
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || '',
 }
 

@@ -5,6 +5,6 @@ export default defineConfig({
   out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL || 'postgresql://postgres:ogechi12@localhost:5432/hr-system',
+    url: 'postgresql://admin1:ogechi12@hrsystem.c3a0qmaasxx9.eu-west-1.rds.amazonaws.com:5432/hrsystem',
   },
 }) 
