@@ -1,52 +1,54 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
-// AWS S3 configuration
+// AWS S3 configuration (hardcoded for testing)
 const s3Client = new S3Client({
-  region: process.env.REGION || 'eu-west-1',
+  region: 'eu-west-1',
   credentials: {
-    accessKeyId: process.env.ACCESS_KEY_ID || 'AKIA23WHTYZLAQPZSQF2',
-    secretAccessKey: process.env.SECRET_ACCESS_KEY || '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',
+    accessKeyId: 'AKIA23WHTYZLAQPZSQF2',
+    secretAccessKey: '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',
   },
 })
 
-const BUCKET_NAME = process.env.S3_BUCKET || 'hope-hr-upload'
-
-// Debug: Log the bucket name value
-console.log('S3_BUCKET value:', JSON.stringify(process.env.S3_BUCKET))
-console.log('BUCKET_NAME variable:', JSON.stringify(BUCKET_NAME))
-console.log('BUCKET_NAME length:', BUCKET_NAME.length)
+const BUCKET_NAME = 'hope-hr-upload'
 
 /**
  * Generate a signed URL for uploading an image to S3
  */
 export async function generateUploadUrl(fileName: string, contentType: string, key?: string): Promise<string> {
-  const fileKey = key || `employee-photos/${Date.now()}-${fileName}`
-  
-  console.log('Creating PutObjectCommand with bucket:', JSON.stringify(BUCKET_NAME))
-  
-  const command = new PutObjectCommand({
-    Bucket: BUCKET_NAME,
-    Key: fileKey,
-    ContentType: contentType,
-  })
+  try {
+    const fileKey = key || `employee-photos/${Date.now()}-${fileName}`
+    
+    const command = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: fileKey,
+      ContentType: contentType,
+    })
 
-  const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 }) // 1 hour
-  
-  return signedUrl
+    const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 }) // 1 hour
+    return signedUrl
+  } catch (error) {
+    console.error('Error generating upload URL:', error)
+    throw error
+  }
 }
 
 /**
  * Generate a signed URL for viewing an image from S3
  */
 export async function generateViewUrl(key: string): Promise<string> {
-  const command = new GetObjectCommand({
-    Bucket: BUCKET_NAME,
-    Key: key,
-  })
+  try {
+    const command = new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+    })
 
-  const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 }) // 1 hour
-  return signedUrl
+    const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 }) // 1 hour
+    return signedUrl
+  } catch (error) {
+    console.error('Error generating view URL:', error)
+    throw error
+  }
 }
 
 /**
@@ -60,16 +62,21 @@ export function getImageUrl(key: string): string {
  * Delete an image from S3
  */
 export async function deleteImage(imageUrl: string): Promise<void> {
-  // Extract key from URL
-  const urlParts = imageUrl.split('/')
-  const key = urlParts.slice(3).join('/') // Remove https://bucket.s3.region.amazonaws.com/
-  
-  const command = new DeleteObjectCommand({
-    Bucket: BUCKET_NAME,
-    Key: key,
-  })
+  try {
+    // Extract key from URL
+    const urlParts = imageUrl.split('/')
+    const key = urlParts.slice(3).join('/') // Remove https://bucket.s3.region.amazonaws.com/
+    
+    const command = new DeleteObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+    })
 
-  await s3Client.send(command)
+    await s3Client.send(command)
+  } catch (error) {
+    console.error('Error deleting image:', error)
+    throw error
+  }
 }
 
 /**
