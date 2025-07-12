@@ -16,7 +16,7 @@ A modern, fullstack internal HR management system built with Next.js, featuring 
 
 ## 🚀 Live Demo
 
-[Deployed on AWS Amplify](https://your-amplify-app-url.amplifyapp.com)
+[Deployed on AWS Amplify](https://main.d2rui1j8gj3xa8.amplifyapp.com/)
 
 ## 🎯 Features
 
@@ -239,9 +239,6 @@ NEXTAUTH_SECRET=your_nextauth_secret
 
 ## 📹 Video Walkthrough
 https://screenrec.com/share/PWQcVmRTaU
-
-## Link to site
-https://main.d2rui1j8gj3xa8.amplifyapp.com/
 
 ## 💬 Note on SQL Test Score
 
