@@ -1,13 +1,11 @@
-name: Deploy to AWS
+name: Deploy to AWS (Simple)
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
-  test:
+  test-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -19,11 +17,16 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: Run tests
-        run: npm test
+        run: pnpm test
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -31,26 +34,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: Build application
-        run: npm run build
+        run: pnpm build
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -58,27 +44,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-files
-          path: .next/
-          retention-days: 1
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-files
-          path: .next/
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -87,34 +52,27 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Deploy to S3 (Static Hosting)
+      - name: Deploy to S3
         run: |
+          # Sync build files to S3
           aws s3 sync .next/ s3://${{ secrets.AWS_S3_BUCKET }} --delete
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+          
+          # Invalidate CloudFront cache (if you have CloudFront)
+          if [ ! -z "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" ]; then
+            aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+          fi
 
-      - name: Deploy to EC2 (Alternative - Server Deployment)
+      - name: Deploy to EC2 (Optional)
         if: ${{ secrets.EC2_INSTANCE_ID != '' }}
         run: |
           # Create deployment package
           tar -czf deployment.tar.gz .next/ package.json pnpm-lock.yaml
           
-          # Copy to EC2 instance
+          # Copy to S3 for EC2 to download
           aws s3 cp deployment.tar.gz s3://${{ secrets.AWS_S3_BUCKET }}/deployment.tar.gz
           
-          # Execute deployment script on EC2
+          # Execute deployment on EC2
           aws ssm send-command \
             --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
             --document-name "AWS-RunShellScript" \
-            --parameters 'commands=["cd /var/www/hr-system", "aws s3 cp s3://${{ secrets.AWS_S3_BUCKET }}/deployment.tar.gz .", "tar -xzf deployment.tar.gz", "pnpm install --prod", "pm2 restart hr-system"]'
-
-      - name: Deploy to AWS Amplify (Alternative)
-        if: ${{ secrets.AMPLIFY_APP_ID != '' }}
-        run: |
-          # Install Amplify CLI
-          npm install -g @aws-amplify/cli
-          
-          # Configure Amplify
-          amplify configure --yes
-          
-          # Deploy to Amplify
-          amplify publish --yes 
+            --parameters 'commands=["cd /var/www/hr-system", "aws s3 cp s3://${{ secrets.AWS_S3_BUCKET }}/deployment.tar.gz .", "tar -xzf deployment.tar.gz", "pnpm install --prod", "pm2 restart hr-system"]' 
