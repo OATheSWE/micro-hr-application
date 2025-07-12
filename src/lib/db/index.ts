@@ -3,11 +3,12 @@ import postgres from 'postgres'
 import * as schema from './schema'
 
 // Database connection configuration
-const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:ogechi12@localhost:5432/hr-system'
+const connectionString = 'postgresql://admin1:ogechi12@hrsystem.c3a0qmaasxx9.eu-west-1.rds.amazonaws.com:5432/hrsystem?sslmode=require'
 
 // Create postgres client
 const client = postgres(connectionString, {
   max: 1, // Use a single connection for development
+  ssl: 'require', // Require SSL connection
 })
 
 // Create Drizzle database instance
