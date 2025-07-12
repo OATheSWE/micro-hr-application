@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getUserFromRequest } from '@/lib/auth/jwt'
-import { generateUploadUrl, getImageUrl } from '@/lib/aws/s3'
+import { generateUploadUrl } from '@/lib/aws/s3'
+import { config } from 'dotenv'
+
+// Load environment variables
+config()
+
+// Debug: Log environment variables at the top
+console.log('=== UPLOAD API DEBUG ===')
+console.log('AWS_S3_BUCKET:', JSON.stringify(process.env.AWS_S3_BUCKET))
+console.log('AWS_REGION:', JSON.stringify(process.env.AWS_REGION))
+console.log('AWS_ACCESS_KEY_ID:', process.env.AWS_ACCESS_KEY_ID ? 'SET' : 'NOT_SET')
+console.log('AWS_SECRET_ACCESS_KEY:', process.env.AWS_SECRET_ACCESS_KEY ? 'SET' : 'NOT_SET')
+console.log('========================')
 
 // POST /api/upload/image - Generate signed URL for image upload
 export async function POST(request: NextRequest) {
   try {
+    console.log('=== UPLOAD API CALLED ===')
+    
     // Check authentication
     const userData = getUserFromRequest(request.headers)
     if (!userData) {
@@ -41,16 +55,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate signed URL
-    const signedUrl = await generateUploadUrl(fileName, contentType)
+    console.log('About to call generateUploadUrl...')
     
-    // Generate the final image URL
+    // Generate the key first (this ensures same timestamp)
     const key = `employee-photos/${Date.now()}-${fileName}`
-    const imageUrl = getImageUrl(key)
+    
+    // Generate signed URL with the same key
+    const signedUrl = await generateUploadUrl(fileName, contentType, key)
+    
+    // Return the exact URL that the file will have after upload
+    const objectUrl = `https://hope-hr-upload.s3.eu-west-1.amazonaws.com/${key.replace(/ /g, '+')}`
 
     return NextResponse.json({
       signedUrl,
-      imageUrl,
+      imageUrl: objectUrl, // This is the exact URL the file will have
       key,
     })
   } catch (error) {
