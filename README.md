@@ -238,8 +238,10 @@ NEXTAUTH_SECRET=your_nextauth_secret
 - **Flexible**: Custom claims for roles
 
 ## 📹 Video Walkthrough
+https://screenrec.com/share/PWQcVmRTaU
 
-[Link to 4-5 minute technical walkthrough video]
+## Link to site
+https://main.d2rui1j8gj3xa8.amplifyapp.com/
 
 ## 💬 Note on SQL Test Score
 

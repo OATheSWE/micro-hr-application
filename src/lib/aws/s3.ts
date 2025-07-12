@@ -17,7 +17,7 @@ const BUCKET_NAME = 'hope-hr-upload'
  */
 export async function generateUploadUrl(fileName: string, contentType: string, key?: string): Promise<string> {
   try {
-    const fileKey = key || `employee-photos/${Date.now()}-${fileName}`
+    const fileKey = `employee-photos/${Date.now()}-${fileName}`
     
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,
