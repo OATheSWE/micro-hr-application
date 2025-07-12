@@ -8,7 +8,7 @@ frontend:
          - pnpm install --no-frozen-lockfile
     build:
       commands:
-        - NEXTJS_IGNORE_ESLINT=true NEXTJS_IGNORE_TS_ERRORS=true pnpm run build
+        - pnpm run build
   artifacts:
     baseDirectory: .next
     files:
